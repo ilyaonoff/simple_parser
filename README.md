@@ -1,5 +1,5 @@
 # simple_parser
-This is part of the formal languages homework.
+This is part of the formal languages homework(HW05).
 
 Run parser:
 ```

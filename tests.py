@@ -1,41 +1,46 @@
+from parser import parse
 import unittest
-import parser as prs
-
-class TestParser(unittest.TestCase):
-    def test_many_brackets(self):
-        case1 = prs.Parser('f :- (a;b),(((c,d;(a)))),((a,b),((c);d);(a,d,c));(a).')
-        case2 = prs.Parser('Id_1_2_f :- (_1;_2,(a2);(aaa),(a);(b_b)).')
-        self.assertTrue(case1.program())
-        self.assertTrue(case2.program())
- 
-    def test_many_whitespaces_and_tabs(self):
-        parser = prs.Parser('             f            :-\t\t\t\t g\t    \t ,h\t\t\t\t    .')
-        self.assertTrue(parser.program())
-
-    def test_many_newlines(self):
-        parser = prs.Parser('\n\n\n\nf\n\n\n    :-\n  (\nf;\n\n\t\t\n h)\n.')
-        self.assertTrue(parser.program())
-
-    def test_several_relations(self):
-        case1 = prs.Parser('f.\nf :- g.\n f :- g, h; t.\nf :- g, (h; t).')
-        case2 = prs.Parser('_id1:-_id1;_id2.\n\nf :- \n\n g\n,h\t\t.head :- body.only_head.')
-        self.assertTrue(case1.program())
-        self.assertTrue(case2.program())
-
-    def test_incorrect_bracket_sequance(self):
-        case1 = prs.Parser('f:-(fasdfjas;fdkasd,(aaa;(b));(c).')
-        case2 = prs.Parser('f:-f,h;(k;(l,m.')
-        self.assertFalse(case1.program())
-        self.assertFalse(case2.program())
-
-    def test_incorrect_relation_declaration(self):
-        self.assertFalse(prs.Parser('f').program())
-        self.assertFalse(prs.Parser(':- f.').program())
-        self.assertFalse(prs.Parser('f :- .').program())
-        self.assertFalse(prs.Parser('f :- g;h, .').program())
-        self.assertFalse(prs.Parser('f:-(g, h) :- k, l, m.').program())
-        self.assertFalse(prs.Parser('a :- aa(aa).\n\nb_b \n:-\ng;;h.').program())
 
 
-if __name__ == '__main__':
+class Test(unittest.TestCase):
+    def test_correct(self):
+        self.assertTrue(parse(
+            'f.\nf :- g.\n f :- g, h; t.\n f :- g, (h; t).\nf a :- g, h (t c d).\nf (cons h t) :- g h, f t.'))
+        self.assertTrue(parse(
+            'odd (cons H (cons H1 T)) (cons H T1) :- odd T T1. \n odd (cons H nil) nil. \nodd nil nil.'))
+        self.assertTrue(
+            parse('f :- (((g))).\nf :- a ((((b)))).\nf  :- a (a (a)).'))
+        self.assertTrue(parse('f :- (a b) , (c d). '))
+        self.assertTrue(parse(
+            'a \n\n\tb (((\naa\n)\n)\n)\n\n\n\n.f ((((a ((((b)))))))) :- (((((a (b)))))).'))
+        self.assertTrue(parse('a b c d e f g h. q w e r t :- q w e r t.'))
+        self.assertTrue(
+            parse('one two (three (four)) :- ((a));(b,c;d a a a ;(a)).'))
+        self.assertTrue(parse('a (b c (d)) :- a;(a b,c,d).'))
+        self.assertTrue(parse('f (a (b c) d (e (f g))).'))
+
+    def test_incorrect(self):
+        self.assertFalse(parse('(a b) c.'))
+        self.assertFalse(parse('a ((b) c).'))
+        self.assertFalse(parse('f :- a ((a b) (a b)).'))
+        self.assertFalse(parse('a (a b )))))).'))
+        self.assertFalse(parse('head'))
+        self.assertFalse(parse('head :- body'))
+        self.assertFalse(parse('f :- g; h, .'))
+        self.assertFalse(parse('f :- (g; (f).'))
+        self.assertFalse(parse('f ().'))
+        self.assertFalse(parse('(((b))).'))
+        self.assertFalse(parse('.'))
+        self.assertFalse(parse('head :- id ;;;;; id.'))
+        self.assertFalse(parse('a (a ; b, c).'))
+        self.assertFalse(parse('f (c;c;c) :- b.'))
+        self.assertFalse(parse('h :- a (a ; b).'))
+        self.assertFalse(parse('f ( :- ) h.'))
+        self.assertFalse(parse('f :- g.....'))
+        self.assertFalse(parse('f\ng.\nf :- a ((f;g).\nf ).'))
+        self.assertFalse(parse('f :- g \ng :- f.'))
+        self.assertFalse(parse('f.f :- .\nf g :- f ((b);), h.'))
+
+
+if __name__ == "__main__":
     unittest.main()
