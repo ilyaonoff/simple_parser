@@ -21,14 +21,23 @@ t_ID = r'[a-zA-Z_][a-zA-Z_0-9]*'
 
 t_ignore = ' \t'
 
+
+class IllegalCharException(Exception):
+    def __init__(self, text):
+        self.message = text
+
+    def info(self):
+        return self.message
+
+
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
 
 
 def t_error(t):
-    print("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1)
+    raise IllegalCharException("Illegal character '%s'" % t.value[0])
+
 
 def make_lexer():
     return lex.lex()

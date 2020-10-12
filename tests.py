@@ -40,6 +40,9 @@ class Test(unittest.TestCase):
         self.assertFalse(parse('f\ng.\nf :- a ((f;g).\nf ).'))
         self.assertFalse(parse('f :- g \ng :- f.'))
         self.assertFalse(parse('f.f :- .\nf g :- f ((b);), h.'))
+        self.assertFalse(parse('\\\\\\.'))
+        self.assertFalse(parse('f \ (g h) :- h.'))
+        self.assertFalse(parse('f :.'))
 
 
 if __name__ == "__main__":

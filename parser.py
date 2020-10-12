@@ -1,4 +1,4 @@
-from lexer import tokens, make_lexer
+from lexer import tokens, make_lexer, IllegalCharException
 import ply.yacc as yacc
 import sys
 
@@ -168,10 +168,14 @@ def make_parser():
 def parse(inputProgram, output=None):
     parser = make_parser()
 
-    global inputText
+    global inputText, errorsInfo, wasError
     inputText = inputProgram
 
-    result = parser.parse(inputText, tracking=True)
+    try:
+        result = parser.parse(inputText, tracking=True)
+    except IllegalCharException as e:
+        wasError = True
+        errorsInfo += e.info()
 
     if output:
         if wasError:
