@@ -1,36 +1,6 @@
 from parsec import *
 import sys
 import argparse
-'''
-------------Grammar---------------
-Prolog   -> Module? TypeSeq? RelationSeq?
-Module   -> 'module' Id.
-
-
-
-TypeSeq  -> TypeDecl TypeSeq | TypeDecl
-TypeDecl -> 'type' Id Type.
-Type     -> Atom | (Type) | Atom -> Type | (Type) -> Type | Var | Var -> Type
-
-
-
-
-Var      -> [A-Z][a-zA-Z0-9_]*
-Id       -> [a-z_][a-zA-Z0-9_]*
-List     -> [] | [Elem, ElemSeq] | [B]
-B        -> Atom '|' Var | Var '|' Var | List '|' Var 
-ElemSeq  -> Elem , ElemSeq | Elem 
-Elem     -> Var | Atom | List
-Atom     -> Id AtomSeq | Id
-AtomSeq  -> Id AtomSeq? | (SthInBrackets) AtomSeq? | Var AtomSeq? | List AtomSeq?
-SthInBrackets -> (SthInBrackets) | Elem
-
-RelationSeq -> Relation RelationSeq | Relation
-Relation    -> Atom :- Expression.  | Atom.
-Expression  -> Term ; Expression | Term
-Term        -> (Expression) , Term | (Expression)
-                | Atom , Term | Atom
-'''
 
 
 class Node:
@@ -224,8 +194,8 @@ def Type():
     return Node('Type', True, [first, rest])
 
 
-def parseProlog(inputText, P=Prolog, output=None):
-    parser = P + eof()
+def parseProlog(inputText, parserType=Prolog, output=None):
+    parser = parserType + eof()
     try:
         result = parser.parse(inputText)
     except ParseError as e:
@@ -246,12 +216,12 @@ def parseProlog(inputText, P=Prolog, output=None):
         return True
 
 
-def parseFile(fileName, P):
+def parseFile(fileName, parserType):
     with open(fileName) as file:
         input = file.read()
 
     with open(f'{fileName}.out', 'w') as file:
-        return parseProlog(P, input, file)
+        return parseProlog(input, parserType, file)
 
 
 if __name__ == "__main__":
