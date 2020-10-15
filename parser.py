@@ -44,12 +44,15 @@ def Var():
     curVar = yield spaces >> var << spaces
     return Node(f'Var : \'{curVar}\'', True)
 
+def eps():
+    return Node('EPSILON', True)
+
 
 @generate
 def Prolog():
     module = yield spaces >> (Module | string('')) << spaces
     if module == '':
-        module = Node('Module', True, [Node('EPSILON', True)])
+        module = Node('Module', True, [eps()])
     types = yield spaces >> TypeSeq << spaces
     relations = yield spaces >> RelationSeq << spaces
     return Node('Prolog', True, [module, types, relations])
@@ -65,25 +68,25 @@ def Module():
 @generate
 def Atom():
     headerId = yield spaces >> Id << spaces
-    atomSeq = yield AtomSeq
+    atomSeq = yield AtomSuf
     return Node('Atom', True, [headerId, atomSeq])
 
 
 @generate
-def AtomSeq():
+def AtomSuf():
     arg = yield spaces >> (Id | Var | List | (string('(') >> SthInBrackets << string(')')) | string('')) << spaces
     if arg == '':
-        return Node('AtomSeq', True)
-    cont = yield spaces >> AtomSeq << spaces
-    return Node('AtomSeq', True, [arg, cont])
+        return Node('AtomSuf', True, [eps()])
+    cont = yield spaces >> AtomSuf << spaces
+    return Node('AtomSuf', True, [arg, cont])
 
 
 def nil():
-    return Node('Atom', True, [Node('Id : \'nil\'', True), Node('AtomSeq', True)])
+    return Node('Atom', True, [Node('Id : \'nil\'', True), Node('AtomSuf', True, [eps()])])
 
 
 def cons(el, suf):
-    return Node('Atom', True, [Node('Id : \'cons\'', True), Node('AtomSeq', True, [el, Node('AtomSeq', True, [suf])])])
+    return Node('Atom', True, [Node('Id : \'cons\'', True), Node('AtomSuf', True, [el, Node('AtomSuf', True, [suf])])])
 
 
 @generate
@@ -127,7 +130,7 @@ def SthInBrackets():
 def RelationSeq():
     rel = yield spaces >> (Relation | string('')) << spaces
     if rel == '':
-        return Node('RelationSeq', True, [Node('EPSILON', False)])
+        return Node('RelationSeq', True, [eps()])
     rest = yield RelationSeq
     return Node('RelationSeq', True, [rel, rest])
 
@@ -147,31 +150,26 @@ def Expression():
     term = yield spaces >> Term << spaces
     afterTerm = yield spaces >> (string(';') | string('')) << spaces
     if afterTerm == '':
-        return Node('Expression', term.needToWrite, [term])
+        return Node('Expression', False, [term])
     rest = yield spaces >> Expression << spaces
-    return Node('Expression', True, [term, rest])  # TODO
+    return Node('Disj', True, [term, rest])
 
 
 @generate
 def Term():
     left = yield spaces >> ((string('(') >> spaces >> Expression << spaces << string(')')) | Atom) << spaces
     afterLeft = yield spaces >> (string(',') | string('')) << spaces
-
-    needWrite = True
-    if left.name == 'Expression':
-        needWrite = False
-
     if afterLeft == '':
-        return Node('Term', needWrite, [left])
+        return Node('Term', False, [left])
     right = yield spaces >> Term << spaces
-    return Node('Term', True, [left, right])
+    return Node('Conj', True, [left, right])
 
 
 @generate
 def TypeSeq():
     typeDef = yield spaces >> (TypeDef | string('')) << spaces
     if typeDef == '':
-        return Node('TypeDef', True, [Node('EPSILON', True)])
+        return Node('TypeDef', True, [eps()])
     rest = yield TypeSeq
     return Node('TypeSeq', True, [typeDef, rest])
 
@@ -187,15 +185,10 @@ def TypeDef():
 def Type():
     first = yield spaces >> ((string('(') >> Type << string(')')) | Atom | Var) << spaces
     maybeArrow = yield spaces >> (string('->') | string('')) << spaces
-
-    needWrite = True
-    if first.name == 'Type':
-        needWrite = False
-
     if maybeArrow == '':
-        return Node('Type', needWrite, [first])
+        return Node('Type', False, [first])
     rest = yield spaces >> Type << spaces
-    return Node('Type', True, [first, rest])
+    return Node('Arrow', True, [first, rest])
 
 
 def parseProlog(inputText, parserType=Prolog, output=None):
@@ -254,3 +247,5 @@ if __name__ == "__main__":
         parseFile(args.list, List)
     elif args.prog:
         parseFile(args.prog, Prolog)
+    elif len(sys.argv) == 2:
+        parseFile(sys.argv[1], Prolog)
