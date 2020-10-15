@@ -144,15 +144,49 @@ class integrateTests(unittest.TestCase):
         self.assertTrue(parse('a a a (((a))) :- a a ([A|A]).'))
         self.assertTrue(parse('''
                                     module name.
+
                                     type fruit (A -> o) -> (((b))).
                                     type veg a.
+
                                     fruit [x, y, z] :- g [x y [z|B]|B].
                                     head.
                                     head :- one;two,three.
                               '''))
+        self.assertTrue(parse('''
+                                    type name (A -> x [x, y, z]) -> a [[X|Y]|Z].
+
+                                    head a [h1, h2, h3] (((a))) b :- a [x, y];b,a a [a]; a (((a))).
+                                    f [].
+                              '''))
+        self.assertTrue(parse('''
+                                    module name.
+
+                                    type t t t t -> (((t))) -> list [] -> list [[]|T].
+                                    type a b [X, Y, [[[Z]]]] -> (A -> B -> C) -> (D -> E -> G -> f [x, y]).
+
+                                    a.b.c.
+                                    head a A AA AAA [A_1, A_2, A_3] :- (a;b;c;d),l [].
+
+                              '''))
 
     def test_incorrect(self):
-        pass
+        self.assertFalse(parse("module."))
+        self.assertFalse(parse('type -> a [a|B].'))
+        self.assertFalse(parse('a a a (((a))) :- A a ([A|A]).'))
+        self.assertFalse(parse('''
+                                    module modules.
+                                    type a a.
+                                    type name [X|Y].
+                               '''))
+        self.assertFalse(parse(''' 
+                                    type f f -> f.
+                                    [f, x, y] z.
+                               '''))
+        self.assertFalse(parse('''
+                                    module id.
+                                    type id
+                                    f f :- f;f
+                               '''))
 
 
 if __name__ == "__main__":
