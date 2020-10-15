@@ -224,7 +224,7 @@ def Type():
     return Node('Type', True, [first, rest])
 
 
-def parseProlog(P, inputText, output=None):
+def parseProlog(inputText, P=Prolog, output=None):
     parser = P + eof()
     try:
         result = parser.parse(inputText)
@@ -246,7 +246,7 @@ def parseProlog(P, inputText, output=None):
         return True
 
 
-def parseFile(P, fileName):
+def parseFile(fileName, P):
     with open(fileName) as file:
         input = file.read()
 
@@ -267,16 +267,16 @@ if __name__ == "__main__":
     args = argumentParser.parse_args()
 
     if args.atom:
-        parseFile(Atom, args.atom)
+        parseFile(args.atom, Atom)
     elif args.typeexpr:
-        parseFile(Type, args.typeexpr)
+        parseFile(args.typeexpr, Type)
     elif args.type:
-        parseFile(TypeDef, args.type)
+        parseFile(args.type, TypeDef)
     elif args.module:
-        parseFile(Module, args.module)
+        parseFile(args.module, Module)
     elif args.relation:
-        parseFile(Relation, args.relation)
+        parseFile(args.relation, Relation)
     elif args.list:
-        parseFile(List, args.list)
+        parseFile(args.list, List)
     elif args.prog:
-        parseFile(Prolog, args.prog)
+        parseFile(args.prog, Prolog)
