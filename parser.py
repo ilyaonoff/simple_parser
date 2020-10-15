@@ -82,6 +82,10 @@ def nil():
     return Node('Atom', True, [Node('Id : \'nil\'', True), Node('AtomSeq', True)])
 
 
+def cons(el, suf):
+    return Node('Atom', True, [Node('Id : \'cons\'', True), Node('AtomSeq', True, [el, Node('AtomSeq', True, [suf])])])
+
+
 @generate
 def List():
     el = yield spaces >> string('[') >> spaces >> (Elem | string(']')) << spaces
@@ -90,11 +94,11 @@ def List():
     delimitr = yield spaces >> (string('|') | string(',') | string(']'))
     if delimitr == '|':
         suf = yield spaces >> Var << spaces << string(']')
-        return Node('Atom', True, [Node('Id : \'cons\'', True), el, Node('AtomSeq', True, [suf])])
+        return cons(el, suf)
     elif delimitr == ',':
         suf = yield spaces >> ElemSeq << spaces << string(']')
-        return Node('Atom', True, [Node('Id : \'cons\'', True), el, Node('AtomSeq', True, [suf])])
-    return Node('Atom', True, [Node('Id : \'cons\'', True), el, Node('AtomSeq', True, [nil()])])
+        return cons(el, suf)
+    return cons(el, nil())
 
 
 @generate
@@ -102,9 +106,9 @@ def ElemSeq():
     el = yield spaces >> Elem << spaces
     rest = yield spaces >> (string(',') | string('')) << spaces
     if rest == '':
-        return Node('Atom', True, [Node('Id : \'cons\'', True), el, Node('AtomSeq', True, [nil()])])
+        return cons(el, nil())
     seq = yield spaces >> ElemSeq << spaces
-    return Node('Atom', True, [Node('Id : \'cons\'', True), el, Node('AtomSeq', True, [seq])])
+    return cons(el, seq)
 
 
 @generate
