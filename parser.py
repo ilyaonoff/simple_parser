@@ -223,29 +223,34 @@ def parseFile(fileName, parserType):
 
 if __name__ == "__main__":
     argumentParser = argparse.ArgumentParser()
-    argumentParser.add_argument("--atom", type=str)
-    argumentParser.add_argument("--typeexpr", type=str)
-    argumentParser.add_argument("--type", type=str)
-    argumentParser.add_argument("--module", type=str)
-    argumentParser.add_argument("--relation", type=str)
-    argumentParser.add_argument("--list", type=str)
-    argumentParser.add_argument("--prog", type=str)
+    argumentParser.add_argument("--atom")
+    argumentParser.add_argument("--typeexpr")
+    argumentParser.add_argument("--type")
+    argumentParser.add_argument("--module")
+    argumentParser.add_argument("--relation")
+    argumentParser.add_argument("--list")
+    argumentParser.add_argument("--prog")
 
-    args = argumentParser.parse_args()
-
-    if args.atom:
-        parseFile(args.atom, Atom)
-    elif args.typeexpr:
-        parseFile(args.typeexpr, Type)
-    elif args.type:
-        parseFile(args.type, TypeDef)
-    elif args.module:
-        parseFile(args.module, Module)
-    elif args.relation:
-        parseFile(args.relation, Relation)
-    elif args.list:
-        parseFile(args.list, List)
-    elif args.prog:
-        parseFile(args.prog, Prolog)
+    if len(sys.argv) > 3:
+        print("Too many arguments")
+    elif len(sys.argv) == 1:
+        print("Too few arguments")
     elif len(sys.argv) == 2:
         parseFile(sys.argv[1], Prolog)
+    else:
+        args = argumentParser.parse_args()
+
+        if args.atom:
+            parseFile(args.atom, Atom)
+        elif args.typeexpr:
+            parseFile(args.typeexpr, Type)
+        elif args.type:
+            parseFile(args.type, TypeDef)
+        elif args.module:
+            parseFile(args.module, Module)
+        elif args.relation:
+            parseFile(args.relation, Relation)
+        elif args.list:
+            parseFile(args.list, List)
+        elif args.prog:
+            parseFile(args.prog, Prolog)
